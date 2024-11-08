@@ -1,17 +1,9 @@
 package ru.quipy.controller
 
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
-import ru.quipy.api.project.ParticipantAddedEvent
-import ru.quipy.api.project.ProjectAggregate
-import ru.quipy.api.project.ProjectCreatedEvent
+import org.springframework.web.bind.annotation.*
+import ru.quipy.api.project.*
 import ru.quipy.core.EventSourcingService
-import ru.quipy.logic.project.ProjectAggregateState
-import ru.quipy.logic.project.addParticipant
-import ru.quipy.logic.project.createProject
+import ru.quipy.logic.project.*
 import java.util.*
 
 @RestController
@@ -20,20 +12,33 @@ class ProjectController(
     val projectEsService: EventSourcingService<UUID, ProjectAggregate, ProjectAggregateState>
 ) {
 
-    @PostMapping("/{projectTitle}")
-    fun createProject(@PathVariable projectTitle: String, @RequestParam creatorId: String) : ProjectCreatedEvent {
-        return projectEsService.create { it.createProject(UUID.randomUUID(), projectTitle, creatorId) }
+    @PostMapping
+    fun createProject(@RequestBody createProjectRequest: CreateProjectRequest): ProjectCreatedEvent {
+        return projectEsService.create {
+            it.createProject(UUID.randomUUID(), createProjectRequest.projectTitle, createProjectRequest.creatorId)
+        }
     }
 
-    @PostMapping("/{projectId}/participants")
+    @PostMapping("/participants/create")
     fun addParticipant(
-            @PathVariable projectId: UUID,
-            @RequestParam userId: UUID,
-            @RequestParam userName: String
+            @RequestBody request: AddParticipantRequest
     ): ParticipantAddedEvent {
-        return projectEsService.update(projectId) { it.addParticipant(projectId, userId, userName) }
+        return projectEsService.update(request.projectId) {
+            it.addParticipant(request.projectId, request.userId, request.userName)
+        }
     }
+
 }
 
+data class CreateProjectRequest(
+        val projectTitle: String,
+        val creatorId: String
+)
+
+data class AddParticipantRequest(
+        val projectId: UUID,
+        val userId: UUID,
+        val userName: String
+)
 
 

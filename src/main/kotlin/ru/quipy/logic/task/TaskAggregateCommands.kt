@@ -1,6 +1,7 @@
 package ru.quipy.logic.task
 
 import ru.quipy.api.task.*
+import java.time.LocalDateTime
 import java.util.*
 
 fun TaskAggregateState.createTask(
@@ -8,7 +9,7 @@ fun TaskAggregateState.createTask(
         title: String,
         description: String,
         projectId: UUID,
-        deadlineTimestamp: Long,
+        deadlineTimestamp: LocalDateTime,
         statusId: UUID
 ): TaskCreatedEvent {
     return TaskCreatedEvent(
@@ -42,13 +43,13 @@ fun TaskAggregateState.updateStatus(id: UUID, statusId: UUID): TaskStatusUpdated
     )
 }
 
-fun TaskAggregateState.addExecutor(id: UUID): TaskExecutorAddedEvent {
-    if (taskExecutors.values.any { it.userId == id }) {
-        throw IllegalArgumentException("User already exists: $id")
+fun TaskAggregateState.addExecutor(executorId: UUID): TaskExecutorAddedEvent {
+    if (taskExecutors.values.any { it.userId == executorId }) {
+        throw IllegalArgumentException("User already exists: $executorId")
     }
     return TaskExecutorAddedEvent(
             taskId = this.getId(),
-            executorId = id
+            executorId = executorId
     )
 }
 

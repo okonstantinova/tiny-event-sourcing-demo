@@ -3,6 +3,7 @@ package ru.quipy.api.task
 import ru.quipy.core.annotations.DomainEvent
 import ru.quipy.domain.Event
 import ru.quipy.logic.task.TaskExecutor
+import java.time.LocalDateTime
 import java.util.*
 
 // константы для идентификации различных типов событий, связанных с задачей
@@ -20,7 +21,7 @@ class TaskCreatedEvent(
         val projectId: UUID, // id проекта, к которому относится задача
         val title: String,
         val description: String,
-        val deadlineTimestamp: Long,
+        val deadlineTimestamp: LocalDateTime,
         val statusId: UUID,  // начальный статус задачи
         val executors: Map<UUID, TaskExecutor> = emptyMap(), // назначенные исполнители задачи
         createdAt: Long = System.currentTimeMillis() // временная метка создания

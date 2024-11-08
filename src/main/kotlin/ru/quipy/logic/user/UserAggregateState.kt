@@ -1,7 +1,6 @@
 package ru.quipy.logic.user
 
-import ru.quipy.api.user.UserAggregate
-import ru.quipy.api.user.UserCreatedEvent
+import ru.quipy.api.user.*
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
 import java.util.*

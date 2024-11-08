@@ -1,15 +1,9 @@
 package ru.quipy.controller
 
 import org.springframework.web.bind.annotation.*
-import ru.quipy.api.status.StatusCreatedEvent
-import ru.quipy.api.status.StatusAggregate
-import ru.quipy.api.status.StatusColorUpdatedEvent
-import ru.quipy.api.status.StatusTitleUpdatedEvent
+import ru.quipy.api.status.*
 import ru.quipy.core.EventSourcingService
-import ru.quipy.logic.status.StatusAggregateState
-import ru.quipy.logic.status.createStatus
-import ru.quipy.logic.status.updateColor
-import ru.quipy.logic.status.updateTitle
+import ru.quipy.logic.status.*
 import java.util.*
 
 @RestController
@@ -19,25 +13,37 @@ class StatusController(
 ) {
     @PostMapping("/create")
     fun createStatus(
-            @RequestParam name: String,
-            @RequestParam color: String
+            @RequestBody request: CreateStatusRequest
     ): StatusCreatedEvent {
-        return statusEsService.create { it.createStatus(name, color) }
+        return statusEsService.create { it.createStatus(request.name, request.color) }
     }
 
-    @PostMapping("/{statusId}/updateTitle")
+    @PostMapping("/updateTitle")
     fun updateTitle(
-            @PathVariable statusId: UUID,
-            @RequestParam newTitle: String
+            @RequestBody request: UpdateStatusTitleRequest
     ): StatusTitleUpdatedEvent {
-        return statusEsService.update(statusId) { it.updateTitle(statusId, newTitle) }
+        return statusEsService.update(request.statusId) { it.updateTitle(request.statusId, request.newTitle) }
     }
 
-    @PostMapping("/{statusId}/updateColor")
+    @PostMapping("/updateColor")
     fun updateColor(
-            @PathVariable statusId: UUID,
-            @RequestParam newColor: String
+            @RequestBody request: UpdateStatusColorRequest
     ): StatusColorUpdatedEvent {
-        return statusEsService.update(statusId) { it.updateColor(statusId, newColor) }
+        return statusEsService.update(request.statusId) { it.updateColor(request.statusId, request.newColor) }
     }
 }
+
+data class CreateStatusRequest(
+        val name: String,
+        val color: String
+)
+
+data class UpdateStatusTitleRequest(
+        val statusId: UUID,
+        val newTitle: String
+)
+
+data class UpdateStatusColorRequest(
+        val statusId: UUID,
+        val newColor: String
+)

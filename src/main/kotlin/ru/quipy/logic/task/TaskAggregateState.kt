@@ -3,6 +3,7 @@ package ru.quipy.logic.task
 import ru.quipy.api.task.*
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
+import java.time.LocalDateTime
 import java.util.*
 
 // класс состояния агрегата задачи, отслеживающий атрибуты задачи и ее изменения
@@ -11,7 +12,7 @@ class TaskAggregateState : AggregateState<UUID, TaskAggregate> {
     lateinit var linkedProjectId: UUID
     lateinit var title: String
     lateinit var description: String
-    var deadlineTimestamp: Long = 0
+    var deadlineTimestamp: LocalDateTime? = null
     lateinit var currentStatusId: UUID
     var taskExecutors = mutableMapOf<UUID, TaskExecutor>()
 

@@ -4,7 +4,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.quipy.api.project.ProjectAggregate
+import ru.quipy.api.project.ProjectCreatedEvent
 import ru.quipy.streams.annotation.AggregateSubscriber
+import ru.quipy.streams.annotation.SubscribeEvent
 
 @Service
 @AggregateSubscriber(
@@ -13,4 +15,10 @@ import ru.quipy.streams.annotation.AggregateSubscriber
 class AnnotationBasedProjectEventsSubscriber {
 
     val logger: Logger = LoggerFactory.getLogger(AnnotationBasedProjectEventsSubscriber::class.java)
+
+    @SubscribeEvent
+    fun taskCreatedSubscriber(event: ProjectCreatedEvent) {
+        logger.info("Task created: {}", event.title)
+    }
+
 }

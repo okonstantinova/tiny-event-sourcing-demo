@@ -1,7 +1,11 @@
+package ru.quipy.controller
+
 import org.springframework.web.bind.annotation.*
 import ru.quipy.api.task.*
 import ru.quipy.core.EventSourcingService
 import ru.quipy.logic.task.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @RestController
@@ -10,49 +14,64 @@ class TaskController(
         val taskEsService: EventSourcingService<UUID, TaskAggregate, TaskAggregateState>
 ) {
     @PostMapping("/create")
-    fun create(
-            @RequestParam title: String,
-            @RequestParam description: String,
-            @RequestParam projectId: UUID,
-            @RequestParam deadlineTimestamp: Long,
-            @RequestParam statusId: UUID
-    ): TaskCreatedEvent {
+    fun create(@RequestBody request: CreateTaskRequest): TaskCreatedEvent {
         val taskId = UUID.randomUUID()
 
-        return taskEsService.create { it.createTask(
+        val deadline = LocalDateTime.parse(request.deadlineTimestamp, DateTimeFormatter.ISO_DATE_TIME)
+
+        return taskEsService.create {
+            it.createTask(
                     id = taskId,
-                    title = title,
-                    description = description,
-                    projectId = projectId,
-                    deadlineTimestamp = deadlineTimestamp,
-                    statusId = statusId
+                    title = request.title,
+                    description = request.description,
+                    projectId = request.projectId,
+                    deadlineTimestamp = deadline,
+                    statusId = request.statusId
             )
         }
     }
 
-    @PostMapping("/{taskId}/updateTitle")
-    fun updateTitle(
-            @PathVariable taskId: UUID,
-            @RequestParam newTitle: String
-    ): TaskTitleUpdatedEvent {
-        return taskEsService.update(taskId) { it.updateTitle(taskId, newTitle) }
-    }
-
-    @PostMapping("/{taskId}/updateDescription")
-    fun updateDescription(
-            @PathVariable taskId: UUID,
-            @RequestParam newDescription: String
-    ): TaskDescriptionUpdatedEvent {
-        return taskEsService.update(taskId) {
-            it.updateDescription(taskId, newDescription)
+    @PostMapping("/updateTitle")
+    fun updateTitle(@RequestBody request: UpdateTaskTitleRequest): TaskTitleUpdatedEvent {
+        return taskEsService.update(request.taskId) {
+            it.updateTitle(request.taskId, request.newTitle)
         }
     }
 
-    @PostMapping("/{taskId}/updateStatus")
-    fun updateStatus(
-            @PathVariable taskId: UUID,
-            @RequestParam newStatusId: UUID
-    ): TaskStatusUpdatedEvent {
-        return taskEsService.update(taskId) { it.updateStatus(taskId, newStatusId) }
+    @PostMapping("/updateDescription")
+    fun updateDescription(@RequestBody request: UpdateTaskDescriptionRequest): TaskDescriptionUpdatedEvent {
+        return taskEsService.update(request.taskId) {
+            it.updateDescription(request.taskId, request.newDescription)
+        }
+    }
+
+    @PostMapping("/updateStatus")
+    fun updateStatus(@RequestBody request: UpdateTaskStatusRequest): TaskStatusUpdatedEvent {
+        return taskEsService.update(request.taskId) {
+            it.updateStatus(request.taskId, request.newStatusId)
+        }
     }
 }
+
+data class CreateTaskRequest(
+        val title: String,
+        val description: String,
+        val projectId: UUID,
+        val deadlineTimestamp: String,
+        val statusId: UUID
+)
+
+data class UpdateTaskTitleRequest(
+        val taskId: UUID,
+        val newTitle: String
+)
+
+data class UpdateTaskDescriptionRequest(
+        val taskId: UUID,
+        val newDescription: String
+)
+
+data class UpdateTaskStatusRequest(
+        val taskId: UUID,
+        val newStatusId: UUID
+)
